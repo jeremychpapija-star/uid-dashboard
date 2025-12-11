@@ -7,12 +7,12 @@ async function loadUIDs() {
     const list = document.getElementById("uidList");
     list.innerHTML = "";
 
-    data.uids.forEach(uid => {
+    data.forEach(item => {
         list.innerHTML += `
             <tr>
-                <td>${uid}</td>
+                <td>${item.uid}</td>
                 <td>
-                    <button class="action-btn" onclick="deleteUID('${uid}')">Eliminar</button>
+                    <button class="action-btn" onclick="deleteUID('${item.uid}')">Eliminar</button>
                 </td>
             </tr>
         `;
@@ -26,7 +26,7 @@ async function addUID() {
     await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid })
+        body: JSON.stringify({ uid: uid, value: "1" })
     });
 
     document.getElementById("newUID").value = "";
@@ -34,14 +34,11 @@ async function addUID() {
 }
 
 async function deleteUID(uid) {
-    await fetch(API_URL, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid })
+    await fetch(`${API_URL}/${uid}`, {
+        method: "DELETE"
     });
 
     loadUIDs();
 }
 
 loadUIDs();
-
