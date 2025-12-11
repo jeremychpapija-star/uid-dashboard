@@ -2,29 +2,44 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>UID Dashboard</title>
+    <title>UID Dashboard PRO</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <h1>UID Dashboard</h1>
 
-    <div id="controls">
-        <input id="newUID" placeholder="Nuevo UID" />
-        <input id="days" placeholder="Días válidos" type="number" min="1" />
-        <button onclick="addUID()">Agregar</button>
-    </div>
+    <header>
+        <h1>UID Dashboard PRO</h1>
+        <p class="subtitle">Gestión profesional de licencias (UIDs)</p>
+    </header>
 
-    <table>
-        <thead>
-            <tr>
-                <th>UID</th>
-                <th>Expira</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="uidList"></tbody>
-    </table>
+    <section class="card">
+        <h2>Agregar nuevo UID</h2>
+        <div class="form-row">
+            <input id="newUID" placeholder="UID" />
+            <input id="days" type="number" placeholder="Días de validez" />
+            <button class="btn primary" onclick="addUID()">Agregar</button>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Lista de UIDs registrados</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>UID</th>
+                    <th>Expira</th>
+                    <th>Días restantes</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="uidList"></tbody>
+        </table>
+    </section>
+
+    <footer>
+        Dashboard PRO — Powered by Cloudflare Workers
+    </footer>
 
     <script src="app.js"></script>
 </body>
