@@ -1,0 +1,51 @@
+body {
+    background: #0d0d0d;
+    color: white;
+    font-family: Arial;
+    padding: 30px;
+}
+
+h1 {
+    text-align: center;
+}
+
+#controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+input {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    background: #0b84ff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 12px;
+    border-bottom: 1px solid #222;
+}
+
+.action-btn {
+    background: #ff4444;
+    border: none;
+    padding: 5px 10px;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
