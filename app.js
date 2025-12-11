@@ -1,4 +1,4 @@
-const API_URL = "https://uid-worker.bottuser7.workers.dev/";
+const API_URL = "https://uid-worker.bottuser7.workers.dev/uids";
 
 async function loadUIDs() {
     const res = await fetch(API_URL);
@@ -44,3 +44,4 @@ async function deleteUID(uid) {
 }
 
 loadUIDs();
+
