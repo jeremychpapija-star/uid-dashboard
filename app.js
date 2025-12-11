@@ -1,5 +1,11 @@
 const API_URL = "https://uid-worker.bottuser7.workers.dev/uids";
 
+function daysLeft(timestamp) {
+    if (!timestamp) return "∞";
+    const diff = timestamp - Date.now();
+    return diff <= 0 ? "Expirado" : Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
 async function loadUIDs() {
     const res = await fetch(API_URL);
     const data = await res.json();
@@ -8,16 +14,19 @@ async function loadUIDs() {
     list.innerHTML = "";
 
     data.forEach(item => {
-        const expDate = item.expires_at 
+        const exp = item.expires_at
             ? new Date(item.expires_at).toLocaleString()
             : "Sin expiración";
+
+        const left = daysLeft(item.expires_at);
 
         list.innerHTML += `
             <tr>
                 <td>${item.uid}</td>
-                <td>${expDate}</td>
+                <td>${exp}</td>
+                <td>${left}</td>
                 <td>
-                    <button class="action-btn" onclick="deleteUID('${item.uid}')">Eliminar</button>
+                    <button class="btn delete" onclick="deleteUID('${item.uid}')">Eliminar</button>
                 </td>
             </tr>
         `;
@@ -29,24 +38,26 @@ async function addUID() {
     const days = parseInt(document.getElementById("days").value.trim());
 
     if (!uid) return alert("Escribe un UID");
-    if (!days) return alert("Escribe días válidos");
+    if (!days) return alert("Días inválidos");
 
     await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid: uid, value: "1", days: days })
+        body: JSON.stringify({
+            uid: uid,
+            value: "1",
+            days: days
+        })
     });
 
     document.getElementById("newUID").value = "";
     document.getElementById("days").value = "";
+
     loadUIDs();
 }
 
 async function deleteUID(uid) {
-    await fetch(`${API_URL}/${uid}`, {
-        method: "DELETE"
-    });
-
+    await fetch(`${API_URL}/${uid}`, { method: "DELETE" });
     loadUIDs();
 }
 
