@@ -1,11 +1,5 @@
 const API_URL = "https://uid-worker.bottuser7.workers.dev/uids";
 
-function daysLeft(timestamp) {
-    if (!timestamp) return "∞";
-    const diff = timestamp - Date.now();
-    return diff <= 0 ? "Expirado" : Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
-
 async function loadUIDs() {
     const res = await fetch(API_URL);
     const data = await res.json();
@@ -13,20 +7,31 @@ async function loadUIDs() {
     const list = document.getElementById("uidList");
     list.innerHTML = "";
 
-    data.forEach(item => {
-        const exp = item.expires_at
-            ? new Date(item.expires_at).toLocaleString()
+    const users = data.users || {};
+
+    Object.entries(users).forEach(([uid, info]) => {
+        const exp = info.expiresAt
+            ? new Date(info.expiresAt).toLocaleString()
             : "Sin expiración";
 
-        const left = daysLeft(item.expires_at);
+        let left;
+        if (info.daysRemaining === null) {
+            left = "∞";
+        } else if (info.daysRemaining <= 0) {
+            left = "Expirado";
+        } else {
+            left = info.daysRemaining;
+        }
 
         list.innerHTML += `
             <tr>
-                <td>${item.uid}</td>
+                <td>${uid}</td>
                 <td>${exp}</td>
                 <td>${left}</td>
                 <td>
-                    <button class="btn delete" onclick="deleteUID('${item.uid}')">Eliminar</button>
+                    <button class="btn delete" onclick="deleteUID('${uid}')">
+                        Eliminar
+                    </button>
                 </td>
             </tr>
         `;
@@ -35,18 +40,18 @@ async function loadUIDs() {
 
 async function addUID() {
     const uid = document.getElementById("newUID").value.trim();
-    const days = parseInt(document.getElementById("days").value.trim());
+    const days = parseInt(document.getElementById("days").value.trim(), 10);
 
     if (!uid) return alert("Escribe un UID");
-    if (!days) return alert("Días inválidos");
+    if (!days || days <= 0) return alert("Días inválidos");
 
     await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            uid: uid,
+            uid,
             value: "1",
-            days: days
+            days
         })
     });
 
@@ -57,8 +62,11 @@ async function addUID() {
 }
 
 async function deleteUID(uid) {
+    if (!confirm(`¿Eliminar UID ${uid}?`)) return;
+
     await fetch(`${API_URL}/${uid}`, { method: "DELETE" });
     loadUIDs();
 }
 
+// inicial
 loadUIDs();
