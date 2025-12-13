@@ -1,72 +1,116 @@
 const API_URL = "https://uid-worker.bottuser7.workers.dev/uids";
 
+/* =========================
+   CARGAR UIDS
+========================= */
 async function loadUIDs() {
-    const res = await fetch(API_URL);
-    const data = await res.json();
+  const res = await fetch(API_URL);
+  const data = await res.json();
 
-    const list = document.getElementById("uidList");
-    list.innerHTML = "";
+  const users = data.users || {};
+  const list = document.getElementById("uidList");
 
-    const users = data.users || {};
+  list.innerHTML = "";
 
-    Object.entries(users).forEach(([uid, info]) => {
-        const exp = info.expiresAt
-            ? new Date(info.expiresAt).toLocaleString()
-            : "Sin expiración";
+  let total = 0;
+  let active = 0;
+  let expired = 0;
 
-        let left;
-        if (info.daysRemaining === null) {
-            left = "∞";
-        } else if (info.daysRemaining <= 0) {
-            left = "Expirado";
-        } else {
-            left = info.daysRemaining;
-        }
+  Object.entries(users).forEach(([uid, info]) => {
+    total++;
 
-        list.innerHTML += `
-            <tr>
-                <td>${uid}</td>
-                <td>${exp}</td>
-                <td>${left}</td>
-                <td>
-                    <button class="btn delete" onclick="deleteUID('${uid}')">
-                        Eliminar
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
+    const isExpired =
+      info.daysRemaining !== null && info.daysRemaining <= 0;
+
+    if (isExpired) expired++;
+    else active++;
+
+    const expText = info.expiresAt
+      ? new Date(info.expiresAt).toLocaleString()
+      : "Sin expiración";
+
+    let badge;
+    if (info.daysRemaining === null) {
+      badge = `<span class="badge active">∞</span>`;
+    } else if (isExpired) {
+      badge = `<span class="badge expired">Expirado</span>`;
+    } else {
+      badge = `<span class="badge active">${info.daysRemaining} días</span>`;
+    }
+
+    list.innerHTML += `
+      <tr>
+        <td>${uid}</td>
+        <td>${expText}</td>
+        <td>${badge}</td>
+        <td>
+          <button class="btn delete" onclick="deleteUID('${uid}')">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  /* STATS */
+  document.getElementById("totalCount").textContent = total;
+  document.getElementById("activeCount").textContent = active;
+  document.getElementById("expiredCount").textContent = expired;
 }
 
+/* =========================
+   AGREGAR UID
+========================= */
 async function addUID() {
-    const uid = document.getElementById("newUID").value.trim();
-    const days = parseInt(document.getElementById("days").value.trim(), 10);
+  const uidInput = document.getElementById("newUID");
+  const daysInput = document.getElementById("days");
 
-    if (!uid) return alert("Escribe un UID");
-    if (!days || days <= 0) return alert("Días inválidos");
+  const uid = uidInput.value.trim();
+  const days = parseInt(daysInput.value, 10);
 
-    await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            uid,
-            value: "1",
-            days
-        })
-    });
+  if (!uid) {
+    alert("Escribe un UID");
+    return;
+  }
 
-    document.getElementById("newUID").value = "";
-    document.getElementById("days").value = "";
+  if (!days || days <= 0) {
+    alert("Días inválidos");
+    return;
+  }
 
-    loadUIDs();
+  await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      uid,
+      value: "1",
+      days
+    })
+  });
+
+  uidInput.value = "";
+  daysInput.value = "";
+
+  loadUIDs();
 }
 
+/* =========================
+   ELIMINAR UID
+========================= */
 async function deleteUID(uid) {
-    if (!confirm(`¿Eliminar UID ${uid}?`)) return;
+  const ok = confirm(`¿Eliminar UID ${uid}?`);
+  if (!ok) return;
 
-    await fetch(`${API_URL}/${uid}`, { method: "DELETE" });
-    loadUIDs();
+  await fetch(`${API_URL}/${uid}`, {
+    method: "DELETE"
+  });
+
+  loadUIDs();
 }
 
-// inicial
+/* =========================
+   INIT
+========================= */
 loadUIDs();
